@@ -14,21 +14,13 @@
 
 project(MANGROVE)
 
-set(LIBBSONCXX_REQUIRED_VERSION 3.0.1)
-set(LIBBSONCXX_REQUIRED_ABI_VERSION v_noabi)
-find_package(libbsoncxx ${LIBBSONCXX_REQUIRED_VERSION} REQUIRED)
+find_package(libbsoncxx 3.4 REQUIRED)
 
-set(LIBMONGOCXX_REQUIRED_VERSION 3.0.1)
-set(LIBMONGOCXX_REQUIRED_ABI_VERSION v_noabi)
-find_package(libmongocxx ${LIBMONGOCXX_REQUIRED_VERSION} REQUIRED)
+find_package(libmongocxx 3.4 REQUIRED)
 
-set(LIBBSON_REQUIRED_VERSION 1.3.4)
-set(LIBBSON_REQUIRED_ABI_VERSION 1.0)
-find_package(LibBSON ${LIBBSON_REQUIRED_VERSION} REQUIRED)
+find_package(libbson-1.0 1.13.0 REQUIRED)
 
-set(LIBMONGOC_REQUIRED_VERSION 1.3.4)
-set(LIBMONGOC_REQUIRED_ABI_VERSION 1.0)
-find_package(LibMongoC ${LIBMONGOC_REQUIRED_VERSION} REQUIRED)
+find_package(libmongoc-1.0 1.13.0 REQUIRED)
 
 # Update these as needed.
 # TODO: read from file
@@ -56,7 +48,7 @@ set(mangrove_sources
 include_directories(
     ${LIBBSONCXX_INCLUDE_DIRS}
     ${LIBMONGOCXX_INCLUDE_DIRS}
-    ${LIBBSON_INCLUDE_DIRS}
+    ${BSON_INCLUDE_DIRS}
     ${LIBMONGOC_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_BINARY_DIR}/src
@@ -66,15 +58,19 @@ include_directories(
 link_directories(
     ${LIBBSONCXX_LIBRARY_DIRS}
     ${LIBMONGOCXX_LIBRARY_DIRS}
-    ${LIBBSON_LIBRARY_DIRS}
-    ${LIBMONGOC_LIBRARY_DIRS}
+    ${BSON_LIBRARY_DIRS}
+    ${MONGOC_LIBRARY_DIRS}
 )
 
 add_library(mangrove_static STATIC
    ${mangrove_sources}
 )
 
-target_compile_definitions(mangrove_static PUBLIC MANGROVE_STATIC)
+target_compile_definitions(mangrove_static
+    PUBLIC MANGROVE_STATIC
+    PRIVATE ${MONGOC_DEFINITIONS}
+    PRIVATE ${BSON_DEFINITIONS}
+)
 
 set_target_properties(mangrove_static PROPERTIES
     OUTPUT_NAME mangrove
@@ -109,7 +105,7 @@ generate_export_header (mangrove
     STATIC_DEFINE MANGROVE_STATIC
 )
 
-set(mangrove_libs ${LIBBSONCXX_LIBRARIES} ${LIBMONGOCXX_LIBRARIES} ${LIBMONGOC_LIBRARIES} ${LIBBSON_LIBRARIES})
+set(mangrove_libs ${LIBBSONCXX_LIBRARIES} ${LIBMONGOCXX_LIBRARIES} ${MONGOC_LIBRARIES} ${BSON_LIBRARIES})
 
 target_link_libraries(mangrove_static boson_static ${mangrove_libs})
 target_link_libraries(mangrove PUBLIC boson PRIVATE ${mangrove_libs})

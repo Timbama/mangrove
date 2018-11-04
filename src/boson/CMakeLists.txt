@@ -14,21 +14,13 @@
 
 project(BOSON)
 
-set(LIBBSONCXX_REQUIRED_VERSION 3.0.1)
-set(LIBBSONCXX_REQUIRED_ABI_VERSION v_noabi)
-find_package(libbsoncxx ${LIBBSONCXX_REQUIRED_VERSION} REQUIRED)
+find_package(libbsoncxx 3.4 REQUIRED)
 
-set(LIBMONGOCXX_REQUIRED_VERSION 3.0.1)
-set(LIBMONGOCXX_REQUIRED_ABI_VERSION v_noabi)
-find_package(libmongocxx ${LIBMONGOCXX_REQUIRED_VERSION} REQUIRED)
+find_package(libmongocxx 3.4 REQUIRED)
 
-set(LIBBSON_REQUIRED_VERSION 1.3.4)
-set(LIBBSON_REQUIRED_ABI_VERSION 1.0)
-find_package(LibBSON ${LIBBSON_REQUIRED_VERSION} REQUIRED)
+find_package(libbson-1.0 1.13.0 REQUIRED)
 
-set(LIBMONGOC_REQUIRED_VERSION 1.3.4)
-set(LIBMONGOC_REQUIRED_ABI_VERSION 1.0)
-find_package(LibMongoC ${LIBMONGOC_REQUIRED_VERSION} REQUIRED)
+find_package(libmongoc-1.0 1.13.0 REQUIRED)
 
 # Update these as needed.
 # TODO: read from file
@@ -51,8 +43,8 @@ set(boson_sources
 include_directories(
     ${LIBBSONCXX_INCLUDE_DIRS}
     ${LIBMONGOCXX_INCLUDE_DIRS}
-    ${LIBBSON_INCLUDE_DIRS}
-    ${LIBMONGOC_INCLUDE_DIRS}
+    ${BSON_INCLUDE_DIRS}
+    ${MONGOC_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_BINARY_DIR}/src
     ${CMAKE_SOURCE_DIR}/src/third_party/cereal/include
@@ -61,15 +53,19 @@ include_directories(
 link_directories(
     ${LIBBSONCXX_LIBRARY_DIRS}
     ${LIBMONGOCXX_LIBRARY_DIRS}
-    ${LIBBSON_LIBRARY_DIRS}
-    ${LIBMONGOC_LIBRARY_DIRS}
+    ${BSON_LIBRARY_DIRS}
+    ${MONGOC_LIBRARY_DIRS}
 )
 
 add_library(boson_static STATIC
     ${boson_sources}
 )
 
-target_compile_definitions(boson_static PUBLIC BOSON_STATIC)
+target_compile_definitions(boson_static 
+    PUBLIC BOSON_STATIC
+    PRIVATE ${MONGOC_DEFINITIONS}
+    PRIVATE ${BSON_DEFINITIONS}
+)
 
 set_target_properties(boson_static PROPERTIES
     OUTPUT_NAME boson
@@ -104,7 +100,7 @@ generate_export_header (boson
     STATIC_DEFINE BOSON_STATIC
 )
 
-set(boson_libs ${LIBBSONCXX_LIBRARIES} ${LIBMONGOCXX_LIBRARIES} ${LIBMONGOC_LIBRARIES} ${LIBBSON_LIBRARIES})
+set(boson_libs ${LIBBSONCXX_LIBRARIES} ${LIBMONGOCXX_LIBRARIES} ${MONGOC_LIBRARIES} ${BSON_LIBRARIES})
 
 target_link_libraries(boson_static ${boson_libs})
 target_link_libraries(boson PRIVATE ${boson_libs})
